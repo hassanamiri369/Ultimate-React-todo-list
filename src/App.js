@@ -29,7 +29,7 @@ function App() {
        <button>Add Todo</button>
 
        <div>
-         {todos.map(item => <p key={item.id}>{item.text}</p>)}
+         {todos.map(item => <p className="todo" key={item.id}>{item.text}</p>)}
        </div>
      </form>
     </div>
