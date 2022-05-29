@@ -1,67 +1,113 @@
-import React  ,{useState , useEffect} from "react";
+import React from "react";
 
+const App = () => {
+  const [todos, setTodos] = React.useState([]);
+  const [todo, setTodo] = React.useState("");
 
-function App() {
+//   edit state
+  const [todoEditing, setTodoEditing] = React.useState(null);
+  const [editingText, setEditingText] = React.useState("");
 
-  const [todos , setTodos] = useState([])
-  console.log(todos)
-  const [todo , setTodo] = useState("")
-
-
-  const handleSubmit = (e)=>{
-    e.preventDefault()
-    
-    const newTodo = {
-      id : new Date().getTime(),
-      text : todo,
-      completed : false,
+  React.useEffect(() => {
+    const json = localStorage.getItem("todos");
+    const loadedTodos = JSON.parse(json);
+    if (loadedTodos) {
+      setTodos(loadedTodos);
     }
+  }, []);
 
+  React.useEffect(() => {
+    const json = JSON.stringify(todos);
+    localStorage.setItem("todos", json);
+  }, [todos]);
+
+
+
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const newTodo = {
+      id: new Date().getTime(),
+      text: todo,
+      completed: false,
+    };
+    // setTodos([...todos].concat(newTodo));
     setTodos([...todos , newTodo])
-    setTodo("")
+    setTodo("");
   }
 
-
-  // delete todo 
-  const deleteTodo = (todoItem)=>{
-    const TodoListAfterDelete = todos.filter(x => x.id !== todoItem.id)
-    setTodos(TodoListAfterDelete)
+  function deleteTodo(id) {
+    let updatedTodos = [...todos].filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
   }
 
-
-
-  // check todo completed
-  const checkTodo = (todoItem)=> {
-    const todoListAfterCheckTodo = todos.map(item => {
-      return item.id === todoItem.id ? {...item , completed : !item.completed} : item;
-    })
-     
-    setTodos(todoListAfterCheckTodo)
+//   const toggleComplete = (id)=> {
+//       const updatedTodos = todos.map(todo => {
+//           return todo.id === id ? {...todo , completed : !todo.completed} : todo;
+//       })
+//       setTodo(updatedTodos)
+//   }
+  function toggleComplete(id) {
+    let updatedTodos = [...todos].map((todo) => {
+      if (todo.id === id) {
+        todo.completed = !todo.completed;
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
   }
 
+  function submitEdits(id) {
+    const updatedTodos = [...todos].map((todo) => {
+      if (todo.id === id) {
+        todo.text = editingText;
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+    setTodoEditing(null);
+  }
 
   return (
-    <div className="App">
-     <h1> Ultimate React Todo-List </h1>
-     <hr/>
+    <div id="todo-list">
+      <h1>Todo List</h1>
 
-     <form onSubmit={handleSubmit}>
-       <input type="text" value={todo} onChange={(e)=> setTodo(e.target.value)} placeholder="new todo ..."/>
-       <button>Add Todo</button>
+      <form onSubmit={handleSubmit}>
+        <input type="text"  onChange={(e) => setTodo(e.target.value)} value={todo} />
+        <button type="submit">Add Todo</button>
+      </form>
 
-       <div>
-         {todos.map(todoItem => <div>
-          <span className="todo" key={todoItem.id}>{todoItem.text}</span>
-          <input type="checkbox"  onChange={()=> checkTodo(todoItem)} checked={todoItem.completed}/>
-          <span onClick={()=> deleteTodo(todoItem)}><button>delete</button></span>
+      {todos.map((todo) => (
+        <div key={todo.id} className="todo">
+          <div className="todo-text">
+            <input type="checkbox" id="completed" checked={todo.completed} onChange={() => toggleComplete(todo.id)} />
 
-         </div>
-         )}
 
-       </div>
-     </form>
+            {todo.id === todoEditing ? (
+              <input
+                type="text"
+                onChange={(e) => setEditingText(e.target.value)}
+              />
+            ) : (
+              <div>{todo.text}</div>
+            )}
+
+            
+          </div>
+          <div className="todo-actions">
+            {todo.id === todoEditing ? (
+              <button onClick={() => submitEdits(todo.id)}>Submit Edits</button>
+            ) : (
+              <button onClick={() => setTodoEditing(todo.id)}>Edit</button>
+            )}
+
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </div>
+        </div>
+      ))}
     </div>
   );
-}
+};
 
 export default App;
