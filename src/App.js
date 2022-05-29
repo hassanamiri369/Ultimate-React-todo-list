@@ -4,6 +4,7 @@ import React  ,{useState , useEffect} from "react";
 function App() {
 
   const [todos , setTodos] = useState([])
+  console.log(todos)
   const [todo , setTodo] = useState("")
 
 
@@ -22,9 +23,20 @@ function App() {
 
 
   // delete todo 
-  const deleteTodo = (item)=>{
-    const TodoListAfterDelete = todos.filter(x => x.id !== item.id)
+  const deleteTodo = (todoItem)=>{
+    const TodoListAfterDelete = todos.filter(x => x.id !== todoItem.id)
     setTodos(TodoListAfterDelete)
+  }
+
+
+
+  // check todo completed
+  const checkTodo = (todoItem)=> {
+    const todoListAfterCheckTodo = todos.map(item => {
+      return item.id === todoItem.id ? {...item , completed : !item.completed} : item;
+    })
+     
+    setTodos(todoListAfterCheckTodo)
   }
 
 
@@ -38,10 +50,13 @@ function App() {
        <button>Add Todo</button>
 
        <div>
-         {todos.map(item => <div>
-          <p className="todo" key={item.id}>{item.text}</p>
-          <span onClick={()=> deleteTodo(item)}><button>delete</button></span>
-         </div>)}
+         {todos.map(todoItem => <div>
+          <span className="todo" key={todoItem.id}>{todoItem.text}</span>
+          <input type="checkbox"  onChange={()=> checkTodo(todoItem)} checked={todoItem.completed}/>
+          <span onClick={()=> deleteTodo(todoItem)}><button>delete</button></span>
+
+         </div>
+         )}
 
        </div>
      </form>
